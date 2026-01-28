@@ -73,4 +73,6 @@ if fmt!="":
     clips=glob.glob("*."+fmt)
     vc_clips=[VideoFileClip(f) for f in clips]
     p_out=os.getcwd()
+    clip=concatenate_videoclips(vc_clips)
     clip.write_videofile(p_out+"\\zam_zam_zam.mp4")
+
