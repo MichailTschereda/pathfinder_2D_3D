@@ -9,12 +9,13 @@ int imageReductionFac=1;
 PShape pshape2D;
 ArrayList<PVector> sorted_px;
 
-public class CoordinatesWithBrightnessDifference {
+public final static int FILTER_FACTOR = 1;
+public final static int MIN_BRIGHTNESS = 4;
 
-    private ArrayList<PVector> unsortedCoordinates;
-    private PImage imgIn;
-    private final static int FILTER_FACTOR = 30;
-    private final static int MIN_BRIGHTNESS = 4;
+public class CoordinatesWithBrightnessDifference {
+    public ArrayList<PVector> unsortedCoordinates;
+    public PImage imgIn;
+
     
     public CoordinatesWithBrightnessDifference(final PImage imgIn) {
         this.unsortedCoordinates = new ArrayList<PVector>();
@@ -22,6 +23,8 @@ public class CoordinatesWithBrightnessDifference {
     }
     
     public ArrayList<PVector> getPixelWithBrightnessDifference() {
+        
+        imgIn.resize(imgIn.width/10, imgIn.height/10);
         imgIn.loadPixels();
         System.out.println(imgIn.width);
         System.out.println(imgIn.height);
@@ -44,8 +47,7 @@ public class CoordinatesWithBrightnessDifference {
                 }
               } catch (Exception e) {
                 System.out.println("Exception: "+e);
-              }
-            }
+              }            }
         }
         System.out.println("Size of image vector arr:"+unsortedCoordinates.size());
         return unsortedCoordinates;
@@ -72,13 +74,10 @@ public class CoordinatePairs {
     * distanceBetweenCo
     */
     public ArrayList<PVector> getSortCoordinates() {
-        this.sortedCo.add(this.unsortedCo.get(this.newSuitedIndex));
-        this.unsortedCo.remove(this.newSuitedIndex);
-        if (this.unsortedCo.size() !=1) {
-          while(newSuitedIndex==0){
-            this.newSuitedIndex = findNextSuitedVector();
-          }
-          this.getSortCoordinates();
+        while (this.unsortedCo.size() !=1) {
+          this.sortedCo.add(this.unsortedCo.get(this.newSuitedIndex));
+          this.unsortedCo.remove(this.newSuitedIndex);
+          this.newSuitedIndex = findNextSuitedVector();
         }
         return this.sortedCo;
     }
