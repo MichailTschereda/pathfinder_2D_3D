@@ -1,7 +1,13 @@
-int Z_OFF,Y_OFF, X_OFF;
-Z_OFF=1;
-Y_OFF=1;
-X_OFF=1;
+//int Z_OFF,Y_OFF, X_OFF;
+int Z_OFF=1;
+int Y_OFF=1;
+int X_OFF=1;
+int Z_EXTRUDE=2;
+String path="C:\\Users\\z00102xz\\Desktop\\pupu.jpg";
+PImage exmp;//= new PImage(path);
+int imageReductionFac=1;
+PShape pshape2D;
+ArrayList<PVector> sorted_px;
 
 public class CoordinatesWithBrightnessDifference {
 
@@ -10,22 +16,25 @@ public class CoordinatesWithBrightnessDifference {
     private final static int FILTER_FACTOR = 30;
     private final static int MIN_BRIGHTNESS = 4;
     
-    public CoordinateWithBrightnessDifference(final PImage imgIn) {
+    public CoordinatesWithBrightnessDifference(final PImage imgIn) {
         this.unsortedCoordinates = new ArrayList<PVector>();
         this.imgIn=imgIn;
     }
     
     public ArrayList<PVector> getPixelWithBrightnessDifference() {
         imgIn.loadPixels();
+        System.out.println(imgIn.width);
+        System.out.println(imgIn.height);
         int runFilter = 0;
         
-        for(int x=1; x < width; x++) {
-            for(int y=0; y < height; y++){
+        for(int x=1; x < imgIn.width; x+=imageReductionFac) {
+            for(int y=0; y < imgIn.height; y+=imageReductionFac){
+              try {
                 int locPix = x + y*imgIn.width;
                 color colorPix = imgIn.pixels[locPix];
                 int locLeftPix = (x -1) + y*imgIn.width;
                 color colorOfLeftNeighBour = imgIn.pixels[locLeftPix];
-                float diffPix =abs(brightness(colorPix)- brightness(colorOftLeftNeighBour));
+                float diffPix =abs(brightness(colorPix)- brightness(colorOfLeftNeighBour));
                 if (diffPix > MIN_BRIGHTNESS) {
                     if (runFilter == FILTER_FACTOR) {
                         unsortedCoordinates.add(new PVector(x,y));
@@ -33,8 +42,12 @@ public class CoordinatesWithBrightnessDifference {
                     }
                     runFilter++;
                 }
+              } catch (Exception e) {
+                System.out.println("Exception: "+e);
+              }
             }
         }
+        System.out.println("Size of image vector arr:"+unsortedCoordinates.size());
         return unsortedCoordinates;
     }
 }
@@ -42,7 +55,7 @@ public class CoordinatesWithBrightnessDifference {
 public class CoordinatePairs {
     private ArrayList<PVector> unsortedCo;
     private ArrayList<PVector> sortedCo;
-    private int newSuitedIndex;
+    private int newSuitedIndex=0;
     private int lastIndexOfSortedCo;
     
     public CoordinatePairs(final ArrayList<PVector> unsortedCo) {
@@ -52,13 +65,20 @@ public class CoordinatePairs {
         this.lastIndexOfSortedCo =0;
         
     }
-    
-    public ArrayList<PVector> sortCoordinates() {
+    /*
+    * Includes all functions bellow. 
+    * findNextSuitedVector
+    * returnOfIndexMin
+    * distanceBetweenCo
+    */
+    public ArrayList<PVector> getSortCoordinates() {
         this.sortedCo.add(this.unsortedCo.get(this.newSuitedIndex));
         this.unsortedCo.remove(this.newSuitedIndex);
         if (this.unsortedCo.size() !=1) {
+          while(newSuitedIndex==0){
             this.newSuitedIndex = findNextSuitedVector();
-            this.sortCoordinates();
+          }
+          this.getSortCoordinates();
         }
         return this.sortedCo;
     }
@@ -99,11 +119,11 @@ public class CoordinatePairs {
 PShape get2DShape(ArrayList<PVector> sortedCo) {
     PShape shape2D = createShape();
     shape2D.beginShape();
-    shape2D.fillShape();
+    fill(255);
     for(int i=0; i < sortedCo.size(); i++) {
       shape2D.vertex(sortedCo.get(i).x - X_OFF, sortedCo.get(i).y - Y_OFF, Z_OFF);
     }
-    shape2D.vertex(sortedCo.get(1).x -X_OFF, sorted.get(1).y - Y_OFF, Z_OFF);
+    shape2D.vertex(sortedCo.get(1).x -X_OFF, sortedCo.get(1).y - Y_OFF, Z_OFF);
     shape2D.endShape(CLOSE);
     return shape2D;
 }
@@ -119,4 +139,20 @@ PShape extrudeShape(PShape before) {
    }
    after.endShape(CLOSE);
    return after;
+}
+
+void setup() {
+  size(600,600);
+  exmp=loadImage(path);
+  System.out.println(path);
+  CoordinatesWithBrightnessDifference cd = new CoordinatesWithBrightnessDifference(exmp);
+  ArrayList<PVector> px = cd.getPixelWithBrightnessDifference();
+  System.out.println("Size from setup:"+px.size());
+  CoordinatePairs cp = new CoordinatePairs(px);
+  sorted_px = cp.getSortCoordinates(); 
+  pshape2D=get2DShape(sorted_px);
+}
+
+void draw() {
+  shape(pshape2D,0,0,height, width);
 }
