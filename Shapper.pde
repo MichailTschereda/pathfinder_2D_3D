@@ -3,14 +3,17 @@ int Z_OFF=1;
 int Y_OFF=1;
 int X_OFF=1;
 int Z_EXTRUDE=2;
-String path="C:\\Users\\z00102xz\\Desktop\\pupu.jpg";
+String path="C:\\UserData\\z00102xz\\Documents\\ON_THE_ROAD\\Gesicht.jpg";
+String pathEnding=split(path,".")[1];
+String pathOut=path+"_OUT."+pathEnding;
 PImage exmp;//= new PImage(path);
 int imageReductionFac=1;
 PShape pshape2D;
 ArrayList<PVector> sorted_px;
+int IMG_RESIZE_FACTOR=1;
 
-public final static int FILTER_FACTOR = 1;
-public final static int MIN_BRIGHTNESS = 4;
+public final static int FILTER_FACTOR = 4;
+public final static int MIN_BRIGHTNESS = 1;
 
 public class CoordinatesWithBrightnessDifference {
     public ArrayList<PVector> unsortedCoordinates;
@@ -24,7 +27,7 @@ public class CoordinatesWithBrightnessDifference {
     
     public ArrayList<PVector> getPixelWithBrightnessDifference() {
         
-        imgIn.resize(imgIn.width/10, imgIn.height/10);
+        imgIn.resize(imgIn.width/IMG_RESIZE_FACTOR, imgIn.height/IMG_RESIZE_FACTOR);
         imgIn.loadPixels();
         System.out.println(imgIn.width);
         System.out.println(imgIn.height);
@@ -154,4 +157,6 @@ void setup() {
 
 void draw() {
   shape(pshape2D,0,0,height, width);
+  saveFrame(pathOut);
+  exit();
 }
